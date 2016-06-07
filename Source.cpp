@@ -15,6 +15,7 @@ HWND Afisare, Gasire_Rapida, Permise_inactive, Categoria_de_Permis;
 HWND Editare_Permis, Valabilitate, Puncte_Amenda, Categorie;
 HANDLE Fundal;
 
+
 FILE *OutStream = fopen("afisare_permise.txt", "w");
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,8 +35,8 @@ nod *rad;
 
 void afisare_preordine(HWND hwnd, nod *rad)
 {
-	FILE *OutStream = fopen("afisare_permise.txt", "a");
-	if (rad != NULL)
+	FILE *OutStream = fopen("permise.txt", "a");
+	if (rad != NULL )//&& rad->key != 0)
 	{
 		fprintf(OutStream, "%d ", rad->key);
 		fprintf(OutStream, "%s ", rad->nume);
@@ -132,22 +133,28 @@ nod* echilibrare(nod *&p){
 	return p;
 }
 
+nod *rezult = NULL;
+
 nod* cautare(nod *p, char *nume)
 {
-	
 	if (p == NULL)
+	{
 		return NULL;
+	}
 	else
 	{
 		if (strcmp(nume, p->nume) == 0)
-			return p;
+		{
+			rezult = p;
+			return rezult;
+		}
 		else
 		{
 			cautare(p->left,nume);
 			cautare(p->right, nume);
 		}
 	}
-	
+	return rezult;
 }
 
 nod* insereaza(nod *&p, int id, char *nume ,char *categorie,int valabilitate,int puncte_amenda)
@@ -180,7 +187,8 @@ nod* insereaza(nod *&p, int id, char *nume ,char *categorie,int valabilitate,int
 	p = echilibrare(p);// daca intervin cazuri de dezechilibru se va echilibra subarborele sau chiar arborele
 }
 
-nod* stergere(nod *&p, int x){
+nod* stergere(nod *&p, int x)
+{
 	nod *q, *r, *w;
 	if (p != NULL)// daca nodul curent este diferit de NULL
 	if (x<p->key) //cheia care se doreste stearsa este mai mica decat informatia din nod
@@ -276,6 +284,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 
 									 FILE *Stream = fopen("permise.txt", "r");
 									 cautare(rad, nume2)->valabilitate = 60;
+
 									 fclose(Stream);
 
 									 afisare_preordine(hwnd,rad);
@@ -285,7 +294,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 									 EndDialog(hwnd, IDC_BUTTON21);
 								 }
 							 }
-
+							 break;
 		}
 
 		case IDC_BUTTON31:
@@ -300,13 +309,13 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 							 else
 							 {
 								 nume3 = (char*)malloc(lungime1 + 1);
-								 GetDlgItemText(hwnd, IDC_EDIT22, nume3, lungime1 + 1);
+								 GetDlgItemText(hwnd, IDC_EDIT30, nume3, lungime1 + 1);
 
 								 if (cautare(rad, nume3) == NULL)
 									 MessageBox(hwnd, "Nu exista acest nume in baza de date!", "Eroare!", MB_OK);
 								 else{
-									 //// nu merge corect
-									 FILE *Stream = fopen("permise.txt", "w");
+									 
+									 FILE *Stream = fopen("permise.txt", "r");
 									 stergere(rad,cautare(rad, nume3)->key);
 									 afisare_preordine(hwnd,rad);
 									 free(nume3);
@@ -314,7 +323,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 									 EndDialog(hwnd, IDC_BUTTON21);
 								 }
 							 }
-
+							 break;
 		}
 
 		case IDC_BUTTON2:
@@ -431,8 +440,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,WPARAM wParam, LPARAM lParam)
 		insereaza(rad, id, nume, categorie, valabilitate, puncte_amenda);
 		
 	}
-
+		FILE *qStream = fopen("permise.txt", "w");
 	fclose(Stream);
+	fclose(qStream);
 
 	switch (msg) {
 
