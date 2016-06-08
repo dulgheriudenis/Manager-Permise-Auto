@@ -18,8 +18,6 @@ HANDLE Fundal;
 
 FILE *OutStream = fopen("afisare_permise.txt", "w");
 
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 typedef struct nod
 	{
 		int key;
@@ -36,7 +34,7 @@ nod *rad;
 void afisare_preordine(HWND hwnd, nod *rad)
 {
 	FILE *OutStream = fopen("permise.txt", "a");
-	if (rad != NULL )//&& rad->key != 0)
+	if (rad != NULL && rad->key != 0)
 	{
 		fprintf(OutStream, "%d ", rad->key);
 		fprintf(OutStream, "%s ", rad->nume);
@@ -46,6 +44,7 @@ void afisare_preordine(HWND hwnd, nod *rad)
 		afisare_preordine(hwnd,rad->left);
 		afisare_preordine(hwnd,rad->right);
 	}
+	
 }
 
 void drum_maxim(nod* p, int &max, int lung)
@@ -237,7 +236,55 @@ nod* stergere(nod *&p, int x)
 	return p;
 }
 
-///////////////
+char *cautare_posesori_permise_inactive(nod *p,char *lista)
+{
+
+	if (p == NULL)
+		return NULL;
+	else
+	{
+		if (p->valabilitate == 0)
+		{
+			strcat(lista, "\n");
+			strcat(lista, p->nume);
+
+			cautare_posesori_permise_inactive(p->left,lista);
+			cautare_posesori_permise_inactive(p->right,lista);
+
+		}
+		else 
+		{
+			cautare_posesori_permise_inactive(p->left, lista);
+			cautare_posesori_permise_inactive(p->right, lista);
+		}
+	}
+	return lista;
+}
+
+char *cautare_posesori_permise_pe_diferite_categorii(nod *p, char *categorie,char *lista)
+{
+	if (p == NULL)
+		return NULL;
+	else
+	{
+		if (strcmp(p->categorie,categorie) == 0)
+		{
+			strcat(lista, "\n");
+			strcat(lista, p->nume);
+
+			cautare_posesori_permise_pe_diferite_categorii(p->left, categorie, lista);
+			cautare_posesori_permise_pe_diferite_categorii(p->right, categorie, lista);
+
+		}
+		else
+		{
+			cautare_posesori_permise_pe_diferite_categorii(p->left, categorie, lista);
+			cautare_posesori_permise_pe_diferite_categorii(p->right, categorie, lista);
+		}
+	}
+	return lista;
+}
+
 BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	switch (Message)
@@ -249,6 +296,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 		switch (LOWORD(wParam))
 		{
 			//!!!!!!!!!!!!!!!!!!!pentru iesirile din functii!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		
 		case IDC_BUTTON1:
 			EndDialog(hwnd, IDC_BUTTON1);
 			break;
@@ -258,7 +306,25 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 		case IDC_BUTTON32:
 			EndDialog(hwnd, IDC_BUTTON32);
 			break;
-
+		case IDC_BUTTON19:
+			EndDialog(hwnd, IDC_BUTTON19);
+			break;
+		case IDCANCEL:
+			EndDialog(hwnd, IDCANCEL);
+			break;
+		case IDCANCEL1:
+			EndDialog(hwnd, IDCANCEL1);
+			break;
+		case IDCANCEL2:
+			EndDialog(hwnd, IDCANCEL2);
+			break;
+		case IDCANCEL3:
+			EndDialog(hwnd, IDCANCEL3);
+			break;
+		case IDCANCEL4:
+			EndDialog(hwnd, IDCANCEL4);
+			break;
+			
 			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 		case IDC_BUTTON21:
@@ -281,11 +347,10 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 									 MessageBox(hwnd, "Nu exista acest nume in baza de date!", "Eroare!", MB_OK);
 								 else{
 
-
-									 FILE *Stream = fopen("permise.txt", "r");
+									 FILE *qStream = fopen("permise.txt", "w");
+									 fclose(qStream);
+									 
 									 cautare(rad, nume2)->valabilitate = 60;
-
-									 fclose(Stream);
 
 									 afisare_preordine(hwnd,rad);
 
@@ -315,11 +380,13 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 									 MessageBox(hwnd, "Nu exista acest nume in baza de date!", "Eroare!", MB_OK);
 								 else{
 									 
-									 FILE *Stream = fopen("permise.txt", "r");
+									 FILE *qStream = fopen("permise.txt", "w");
+									 fclose(qStream);
+									
 									 stergere(rad,cautare(rad, nume3)->key);
 									 afisare_preordine(hwnd,rad);
 									 free(nume3);
-									 fclose(Stream);
+									 
 									 EndDialog(hwnd, IDC_BUTTON21);
 								 }
 							 }
@@ -351,11 +418,9 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 
 
 								insereaza(rad, id1, nume1, categorie1, valabilitate1, puncte_amenda1);
-
-								FILE *Stream = fopen("permise.txt", "a");
-								fprintf(Stream, "%d %s %d %d %s\n", id1, nume1, valabilitate1, puncte_amenda1, categorie1);
-								fclose(Stream);
-
+								FILE *qStream = fopen("permise.txt", "w");
+								fclose(qStream);
+								
 								afisare_preordine(hwnd, rad);
 
 
@@ -367,7 +432,218 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 								EndDialog(hwnd, IDC_BUTTON2);
 								
 							}
+							break;
+		}
 
+		case IDC_BUTTON_Valab:
+		{
+
+							 char *nume3;
+							 int lungime,lungime2,noua_valabilitate;
+							 BOOL flag1;
+							 lungime = GetWindowTextLength(GetDlgItem(hwnd, IDC_EDIT_Nume));
+							 lungime2 = GetWindowTextLength(GetDlgItem(hwnd, IDC_EDIT_N_Valab));
+							 if (lungime == 0 || lungime2 == 0)
+								 MessageBox(hwnd, "Nu ai completat unul din campuri!", "Eroare!", MB_OK);
+							 else
+							 {
+								 nume3 = (char*)malloc(lungime + 1);
+								 GetDlgItemText(hwnd, IDC_EDIT_Nume, nume3, lungime + 1);
+								 noua_valabilitate = GetDlgItemInt(hwnd, IDC_EDIT_N_Valab, &flag1, FALSE);
+
+								 if (cautare(rad, nume3) == NULL)
+									 MessageBox(hwnd, "Nu exista acest nume in baza de date!", "Eroare!", MB_OK);
+								 else{
+
+									 FILE *qStream = fopen("permise.txt", "w");
+									 fclose(qStream);
+
+									 cautare(rad, nume3)->valabilitate = noua_valabilitate;
+
+									 afisare_preordine(hwnd, rad);
+
+									 free(nume3);
+
+									 EndDialog(hwnd, IDC_BUTTON_Valab);
+								 }
+							 }
+							 break;
+		}
+
+		case IDC_BUTTON_E_P_A_P:
+		{
+
+								 char *nume4;
+								 int lungime, lungime2, noile_puncte_amenda;
+								 BOOL flag1;
+								 lungime = GetWindowTextLength(GetDlgItem(hwnd, IDC_EDIT_Nume_E_P_A_P));
+								 lungime2 = GetWindowTextLength(GetDlgItem(hwnd, IDC_EDIT_Puncte_E_P_A_P));
+								 if (lungime == 0 || lungime2 == 0)
+									 MessageBox(hwnd, "Nu ai completat unul din campuri!", "Eroare!", MB_OK);
+								 else
+								 {
+									 nume4 = (char*)malloc(lungime + 1);
+									 GetDlgItemText(hwnd, IDC_EDIT_Nume_E_P_A_P, nume4, lungime + 1);
+									 noile_puncte_amenda = GetDlgItemInt(hwnd, IDC_EDIT_Puncte_E_P_A_P, &flag1, FALSE);
+
+									 if (cautare(rad, nume4) == NULL)
+										 MessageBox(hwnd, "Nu exista acest nume in baza de date!", "Eroare!", MB_OK);
+									 else{
+
+										 FILE *qStream = fopen("permise.txt", "w");
+										 fclose(qStream);
+
+										 cautare(rad, nume4)->puncte_amenda = noile_puncte_amenda;
+
+										 afisare_preordine(hwnd, rad);
+
+										 free(nume4);
+
+										 EndDialog(hwnd, IDC_BUTTON_Valab);
+									 }
+								 }
+								 break;
+		}
+
+		case IDC_BUTTON_E_C_P:
+		{
+
+								   char *nume4,*noua_categorie;
+								   int lungime, lungime2;
+								   BOOL flag1;
+								   lungime = GetWindowTextLength(GetDlgItem(hwnd, IDC_EDIT_Nume_E_C_P));
+								   lungime2 = GetWindowTextLength(GetDlgItem(hwnd, IDC_EDIT_Noua_Categ_E_C_P));
+								   if (lungime == 0 || lungime2 == 0)
+									   MessageBox(hwnd, "Nu ai completat unul din campuri!", "Eroare!", MB_OK);
+								   else
+								   {
+									   nume4 = (char*)malloc(lungime + 1);
+									   noua_categorie = (char*)malloc(lungime2 + 1);
+									   GetDlgItemText(hwnd, IDC_EDIT_Nume_E_C_P, nume4, lungime + 1);
+									   GetDlgItemText(hwnd, IDC_EDIT_Noua_Categ_E_C_P, noua_categorie, lungime + 1);
+
+									   if (cautare(rad, nume4) == NULL)
+										   MessageBox(hwnd, "Nu exista acest nume in baza de date!", "Eroare!", MB_OK);
+									   else{
+
+										   FILE *qStream = fopen("permise.txt", "w");
+										   fclose(qStream);
+
+										   strcpy(cautare(rad, nume4)->categorie, noua_categorie);
+
+										   afisare_preordine(hwnd, rad);
+
+										   free(nume4);
+
+										   EndDialog(hwnd, IDC_BUTTON_E_C_P);
+									   }
+								   }
+								   break;
+		}
+
+		case IDOK_G_R:
+		{
+
+								 char *nume4,detalii_posesor[200],valab[10],puncte[10],id_ul[10];
+								 int lungime;
+								 lungime = GetWindowTextLength(GetDlgItem(hwnd, IDC_EDIT_Nume_G_R));
+								 if (lungime == 0 )
+									 MessageBox(hwnd, "Nu ai completat unul din campuri!", "Eroare!", MB_OK);
+								 else
+								 {
+									 nume4 = (char*)malloc(lungime + 1);
+									 GetDlgItemText(hwnd, IDC_EDIT_Nume_G_R, nume4, lungime + 1);
+
+									 if (cautare(rad, nume4) == NULL)
+										 MessageBox(hwnd, "Nu exista acest nume in baza de date!", "Eroare!", MB_OK);
+									 else{
+
+										 FILE *qStream = fopen("permise.txt", "w");
+										 fclose(qStream);
+
+										 strcpy(detalii_posesor, "Nume : ");
+										 strcat(detalii_posesor, cautare(rad, nume4)->nume);
+
+										 strcat(detalii_posesor, "\nValabitate : ");
+										 sprintf(valab, "%d", cautare(rad, nume4)->valabilitate);
+										 strcat(detalii_posesor, valab);
+										 
+										 strcat(detalii_posesor, "\nPuncte-Amenda : ");
+										 sprintf(puncte, "%d", cautare(rad, nume4)->puncte_amenda);
+										 strcat(detalii_posesor, puncte);
+
+										 strcat(detalii_posesor, "\nCategorie : ");
+										 strcat(detalii_posesor, cautare(rad, nume4)->categorie);
+
+										 strcat(detalii_posesor, "\nID-ul : ");
+										 sprintf(id_ul, "%d", cautare(rad, nume4)->key);
+										 strcat(detalii_posesor, id_ul);
+
+										 MessageBox(hwnd, detalii_posesor, "Afisare date posesor", MB_OK);
+
+										 afisare_preordine(hwnd, rad);
+
+										 free(nume4);
+
+										 EndDialog(hwnd, IDOK_G_R);
+									 }
+								 }
+								 break;
+		}
+
+		case IDC_BUTTON_P_I:
+		{
+
+							   char lista_posesori[150];
+							   
+							   strcpy(lista_posesori, "Lista posesorilor permiselor inactive :\n");
+
+							   if (strcmp(cautare_posesori_permise_inactive(rad, lista_posesori), "Lista posesorilor permiselor inactive :\n") == 0)
+							   {
+								   MessageBox(hwnd, "In baza de date nu exista niciun posesor al carui permis sa fie inactiv .", "Permise inactive", MB_OK);
+							   }
+							   else
+								   MessageBox(hwnd, lista_posesori , "Permise inactive", MB_OK);
+
+								 EndDialog(hwnd, IDC_BUTTON_P_I);
+							 
+						 
+						 break;
+		}
+
+		case IDOK_A_C_P:
+		{
+
+							   char lista_posesori[150];
+
+							   if (IsDlgButtonChecked(hwnd, IDC_RADIO1) == BST_CHECKED)
+							   {
+								   strcpy(lista_posesori, "Lista posesorilor permiselor cu categoria \"A\" este :\n");
+								   if (strcmp(cautare_posesori_permise_pe_diferite_categorii(rad, "CatA", lista_posesori),"Lista posesorilor permiselor cu categoria \"A\" este :\n") == 0)
+								   MessageBox(hwnd, "In baza de date nu exista niciun posesor al vreunui permis cu categoria selectata .", "Ne pare rau !", MB_OK);
+								   else MessageBox(hwnd, lista_posesori, "Permise cu categoria selectata ", MB_OK);
+							   }
+							   else if (IsDlgButtonChecked(hwnd, IDC_RADIO2) == BST_CHECKED)
+							   {
+								   strcpy(lista_posesori, "Lista posesorilor permiselor cu categoria \"B\" este :\n");
+								   if (strcmp(cautare_posesori_permise_pe_diferite_categorii(rad, "CatB", lista_posesori), "Lista posesorilor permiselor cu categoria \"B\" este :\n") == 0)
+									   MessageBox(hwnd, "In baza de date nu exista niciun posesor al vreunui permis cu categoria selectata .", "Ne pare rau !", MB_OK);
+								   else MessageBox(hwnd, lista_posesori, "Permise cu categoria selectata ", MB_OK);
+							   }
+							   else if (IsDlgButtonChecked(hwnd, IDC_RADIO3) == BST_CHECKED)
+							   {
+								   strcpy(lista_posesori, "Lista posesorilor permiselor cu categoria \"C\" este :\n");
+								   if (strcmp(cautare_posesori_permise_pe_diferite_categorii(rad, "CatC", lista_posesori), "Lista posesorilor permiselor cu categoria \"C\" este :\n") == 0)
+									   MessageBox(hwnd, "In baza de date nu exista niciun posesor al vreunui permis cu categoria selectata .", "Ne pare rau !", MB_OK);
+								   else MessageBox(hwnd, lista_posesori, "Permise cu categoria selectata ", MB_OK);
+							   }
+							   else  MessageBox(hwnd, "Nu ati ales nicio categorie .", "Atentie !", MB_OK);
+
+							   
+
+							   EndDialog(hwnd, IDOK_A_C_P);
+
+							   break;
 		}
 
 			//////////
@@ -378,7 +654,6 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 	}
 	return TRUE;
 }
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -440,9 +715,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,WPARAM wParam, LPARAM lParam)
 		insereaza(rad, id, nume, categorie, valabilitate, puncte_amenda);
 		
 	}
-		FILE *qStream = fopen("permise.txt", "w");
-	fclose(Stream);
-	fclose(qStream);
+		
+		fclose(Stream);
+	
 
 	switch (msg) {
 
@@ -467,7 +742,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,WPARAM wParam, LPARAM lParam)
 						Editare_Permis = CreateWindow("BUTTON", "Editare Permis", WS_VISIBLE | WS_CHILD | WS_BORDER, 50, 300, 115, 30, hwnd, (HMENU)20, NULL, NULL);
 						Valabilitate = CreateWindow("BUTTON", "Valabilitate", WS_VISIBLE | WS_CHILD | WS_BORDER, 188, 263, 90, 30, hwnd, (HMENU)21, NULL, NULL);
 						Puncte_Amenda = CreateWindow("BUTTON", "Puncte-Amenda", WS_VISIBLE | WS_CHILD | WS_BORDER, 175, 300, 120, 30, hwnd, (HMENU)22, NULL, NULL);
-						Categorie = CreateWindow("BUTTON", "Categorie", WS_VISIBLE | WS_CHILD | WS_BORDER, 191, 337, 80, 30, hwnd, (HMENU)22, NULL, NULL);
+						Categorie = CreateWindow("BUTTON", "Categorie", WS_VISIBLE | WS_CHILD | WS_BORDER, 191, 337, 80, 30, hwnd, (HMENU)23, NULL, NULL);
 
 						Exit = CreateWindow("BUTTON", "Iesire", WS_VISIBLE | WS_CHILD | WS_BORDER, 390, 300, 65, 30, hwnd, (HMENU)9999, NULL, NULL);
 
@@ -556,7 +831,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,WPARAM wParam, LPARAM lParam)
 
 			 case 11:
 			 {
-					   MessageBox(hwnd, "Ne pare rau ,dar aceasta functie inca nu este implementata !", "Gasire Rapida", MB_OK);
+						int ret2 = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG7), hwnd, AboutDlgProc);
+						if (ret2 == -1)
+							MessageBox(hwnd, "Dialog failed!", "Error", MB_OK | MB_ICONINFORMATION);
 					   ShowWindow(Gasire_Rapida, SW_HIDE);
 					   ShowWindow(Permise_inactive, SW_HIDE);
 					   ShowWindow(Categoria_de_Permis, SW_HIDE);
@@ -564,7 +841,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,WPARAM wParam, LPARAM lParam)
 
 			 case 12:
 			 {
-						MessageBox(hwnd, "Ne pare rau ,dar aceasta functie inca nu este implementata !", "Permise Inactive", MB_OK);
+						int ret2 = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG8), hwnd, AboutDlgProc);
+						if (ret2 == -1)
+							MessageBox(hwnd, "Dialog failed!", "Error", MB_OK | MB_ICONINFORMATION);
 						ShowWindow(Gasire_Rapida, SW_HIDE);
 						ShowWindow(Permise_inactive, SW_HIDE);
 						ShowWindow(Categoria_de_Permis, SW_HIDE);
@@ -572,7 +851,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,WPARAM wParam, LPARAM lParam)
 
 			 case 13:
 			 {
-						MessageBox(hwnd, "Ne pare rau ,dar aceasta functie inca nu este implementata !", "Categorie Permis", MB_OK);
+						int ret1 = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG9), hwnd, AboutDlgProc);
+						if (ret1 == -1)
+							MessageBox(hwnd, "Dialog failed!", "Error", MB_OK | MB_ICONINFORMATION);
+
 						ShowWindow(Gasire_Rapida, SW_HIDE);
 						ShowWindow(Permise_inactive, SW_HIDE);
 						ShowWindow(Categoria_de_Permis, SW_HIDE);
@@ -587,7 +869,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,WPARAM wParam, LPARAM lParam)
 
 			 case 21:
 			 {
-						MessageBox(hwnd, "Ne pare rau ,dar aceasta functie inca nu este implementata !", "Valabilitate", MB_OK);
+						int ret1 = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), hwnd, AboutDlgProc);
+						if (ret1 == -1)
+							MessageBox(hwnd, "Dialog failed!", "Error", MB_OK | MB_ICONINFORMATION);
+
 						ShowWindow(Valabilitate, SW_HIDE);
 						ShowWindow(Puncte_Amenda, SW_HIDE);
 						ShowWindow(Categorie, SW_HIDE);
@@ -595,7 +880,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,WPARAM wParam, LPARAM lParam)
 
 			 case 22:
 			 {
-						MessageBox(hwnd, "Ne pare rau ,dar aceasta functie inca nu este implementata !", "Puncte Amenda", MB_OK);
+						int ret = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG5), hwnd, AboutDlgProc);
+						if (ret == -1)
+							MessageBox(hwnd, "Dialog failed!", "Error", MB_OK | MB_ICONINFORMATION);
 						ShowWindow(Valabilitate, SW_HIDE);
 						ShowWindow(Puncte_Amenda, SW_HIDE);
 						ShowWindow(Categorie, SW_HIDE);
@@ -603,7 +890,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,WPARAM wParam, LPARAM lParam)
 			 
 			 case 23:
 			 {
-				 MessageBox(hwnd, "Ne pare rau ,dar aceasta functie inca nu este implementata !", "Categorie Permis", MB_OK);
+						int ret = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG6), hwnd, AboutDlgProc);
+						if (ret == -1)
+							MessageBox(hwnd, "Dialog failed!", "Error", MB_OK | MB_ICONINFORMATION);
 				 ShowWindow(Valabilitate, SW_HIDE);
 				 ShowWindow(Puncte_Amenda, SW_HIDE);
 				 ShowWindow(Categorie, SW_HIDE);
